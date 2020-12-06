@@ -17,6 +17,37 @@ class GameScene: SKScene {
     private var dy:CGFloat = 10
     private var bricks:[[SKShapeNode?]]?
     
+    fileprivate func ResetBricks(_ brickWidth: CGFloat, _ brickHieght: CGFloat, _ w: CGFloat) {
+        
+        if bricks != nil {
+            for i in 0...4 {
+                for o in 0...8 {
+                    let b = self.bricks![i][o]
+                    if b == nil {
+                        continue
+                    }
+                    self.removeChildren(in: [b!])
+                }
+            }
+        }
+        
+        bricks = Array(repeating: Array(repeating: nil, count: 9), count: 5)
+        
+        for i in 0...4 {
+            for o in 0...8 {
+                bricks![i][o] = SKShapeNode.init(rectOf: CGSize.init(width: brickWidth, height: brickHieght), cornerRadius: w * 0.03)
+                bricks![i][o]!.strokeColor = SKColor.green
+                bricks![i][o]!.glowWidth = 3
+                var x = -self.size.width / 2.5
+                var y = self.size.height / 2.5
+                x = x + self.size.width * CGFloat.init(i) / 5.0
+                y = y - self.size.height * CGFloat.init(o) / 25.0
+                bricks![i][o]!.position = CGPoint.init(x: x, y: y )
+                self.addChild(bricks![i][o]!)
+            }
+        }
+    }
+    
     override func didMove(to view: SKView) {
         
         // Get label node from scene and store it for use later
@@ -58,21 +89,7 @@ class GameScene: SKScene {
         let brickWidth: CGFloat = w/1.5
         let brickHieght: CGFloat = w/5
         
-        bricks = Array(repeating: Array(repeating: nil, count: 9), count: 5)
-        
-        for i in 0...4 {
-            for o in 0...8 {
-                bricks![i][o] = SKShapeNode.init(rectOf: CGSize.init(width: brickWidth, height: brickHieght), cornerRadius: w * 0.03)
-                bricks![i][o]!.strokeColor = SKColor.green
-                bricks![i][o]!.glowWidth = 3
-                var x = -self.size.width / 2.5
-                var y = self.size.height / 2.5
-                x = x + self.size.width * CGFloat.init(i) / 5.0
-                y = y - self.size.height * CGFloat.init(o) / 25.0
-                bricks![i][o]!.position = CGPoint.init(x: x, y: y )
-                self.addChild(bricks![i][o]!)
-            }
-        }
+        ResetBricks(brickWidth, brickHieght, w)
         
         let wait = SKAction.wait(forDuration: 0.02)
         let update = SKAction.run(
@@ -98,6 +115,10 @@ class GameScene: SKScene {
             }
             
             b?.position = p
+            
+            if p.y <= -self.size.height / 2.4 {
+                self.ResetBricks(brickWidth, brickHieght, w)
+            }
             
             let dx = abs(self.podNode!.position.x - self.ballNode!.position.x)
             let dy = abs(self.podNode!.position.y - self.ballNode!.position.y)
